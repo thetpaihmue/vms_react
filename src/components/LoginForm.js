@@ -52,7 +52,12 @@ const Login = () => {
           Cookies.set("jwtToken", data.data[0].token);
 
           AuthService.setAuthHeader();
-          navigate("/vmList");
+
+          if (role === "SuperAdmin") {
+            navigate("/vmList");
+          } else {
+            navigate("/driverList");
+          }
           toast.success("Login successful");
         } else {
           toast.error("Login failed");

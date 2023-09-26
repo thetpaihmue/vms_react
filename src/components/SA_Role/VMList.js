@@ -5,8 +5,8 @@ import {
   getAllVehicleManagers,
   disableVehicleManager,
   reactivateVehicleManager,
-} from "../slices/vms";
-import AuthService from "../services/AuthService";
+} from "../../slices/vms";
+import AuthService from "../../services/AuthService";
 import { Card, Row, Col, Button } from "react-bootstrap";
 import { FaEdit, FaTrash, FaPlus, FaCheck } from "react-icons/fa";
 import { Link } from "react-router-dom";
