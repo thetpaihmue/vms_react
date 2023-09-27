@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useLocation } from "react-router-dom";
-import { editVehicleManager } from "../slices/vms";
+import { editVehicleManager } from "../../slices/vms";
 import { useDispatch } from "react-redux";
-import AuthService from "../services/AuthService";
+import AuthService from "../../services/AuthService";
 import { useNavigate } from "react-router-dom";
 
 const EditVMProfile = () => {
@@ -80,13 +80,13 @@ const EditVMProfile = () => {
     dispatch(editVehicleManager({ id, formattedFormData }))
       .unwrap()
       .then((data) => {
-        navigate("/vmList");
+        navigate("/driverList");
       });
   };
 
   return (
     <div className="container">
-      <h5 className="mb-5">Edit Vehicle Manager Profile</h5>
+      <h5 className="mb-5">Edit Driver Profile</h5>
       <form onSubmit={handleSubmit}>
         <div className="row">
           <div className="col-md-6">

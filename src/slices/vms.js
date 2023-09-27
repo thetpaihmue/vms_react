@@ -3,6 +3,7 @@ import VmsService from "../services/VmsService";
 
 const initialState = {
   vehicleManagers: [],
+  drivers: [],
 };
 
 export const login = createAsyncThunk(
@@ -13,10 +14,15 @@ export const login = createAsyncThunk(
       password,
       appVersion,
     });
+    console.log("res", res);
+    if (res.StatusCode > 400) {
+      throw new Error(res.Message);
+    }
     return res.data;
   }
 );
 
+// Vehicle Managers //
 export const getAllVehicleManagers = createAsyncThunk(
   "employees/getAll",
   async () => {
@@ -56,6 +62,45 @@ export const reactivateVehicleManager = createAsyncThunk(
   }
 );
 
+// Drivers //
+
+export const getAllDrivers = createAsyncThunk("employees/getAll", async () => {
+  const res = await VmsService.getAllDrivers();
+  return res.data;
+});
+
+export const editDriver = createAsyncThunk(
+  "employee/edit",
+  async ({ id, formattedFormData }) => {
+    console.log("in slice");
+    console.log("id", id);
+    console.log("data", formattedFormData);
+    const res = await VmsService.editDriver(id, formattedFormData);
+    return res.data;
+  }
+);
+
+export const disableDriver = createAsyncThunk(
+  "employee/disable",
+  async (id) => {
+    console.log("in slice");
+    console.log("id", id);
+    const res = await VmsService.disableDriver(id);
+    return res.data;
+  }
+);
+
+export const reactivateDriver = createAsyncThunk(
+  "employee/reactivate",
+  async (id) => {
+    console.log("in slice");
+    console.log("id", id);
+    const res = await VmsService.reactivateDriver(id);
+    return res.data;
+  }
+);
+
+// Slice //
 const vmsSlice = createSlice({
   name: "vms",
   initialState,
@@ -68,6 +113,14 @@ const vmsSlice = createSlice({
 
     [editVehicleManager.fulfilled]: (state, action) => {
       state.vehicleManagers = action.payload;
+    },
+
+    [getAllDrivers.fulfilled]: (state, action) => {
+      state.drivers = action.payload;
+    },
+
+    [editDriver.fulfilled]: (state, action) => {
+      state.drivers = action.payload;
     },
   },
 });

@@ -2,39 +2,88 @@ import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  getAllVehicleManagers,
-  disableVehicleManager,
-  reactivateVehicleManager,
+  getAllDrivers,
+  disableDriver,
+  reactivateDriver,
 } from "../../slices/vms";
 import AuthService from "../../services/AuthService";
-import { Card, Row, Col, Button } from "react-bootstrap";
-import { FaEdit, FaTrash, FaPlus, FaCheck } from "react-icons/fa";
+import { Card, Row, Col, Button, Modal } from "react-bootstrap";
+import {
+  FaEdit,
+  FaTrash,
+  FaPlus,
+  FaCheck,
+  FaBus,
+  FaPowerOff,
+} from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
-const VMList = () => {
+function AssignModal(props) {
+  return (
+    <Modal
+      {...props}
+      size="md"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+    >
+      <Modal.Header closeButton>
+        <Modal.Title id="contained-modal-title-vcenter">
+          Modal heading
+        </Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <h4>Centered Modal</h4>
+        <p>
+          Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
+          dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
+          consectetur ac, vestibulum at eros.
+        </p>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={props.onHide}>Close</Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
+const DriverList = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-
-  const { vehicleManagers } = useSelector((state) => state.vms);
+  const [modalShow, setModalShow] = React.useState(false);
+  const { drivers } = useSelector((state) => state.vms);
   const [actionSuccess, setActionSuccess] = useState(false);
 
+  const navigate = useNavigate();
   useEffect(() => {
     AuthService.setAuthHeader();
-    dispatch(getAllVehicleManagers())
+    dispatch(getAllDrivers())
       .then(() => setLoading(false))
       .catch(() => setLoading(false));
     setActionSuccess(false);
   }, [actionSuccess]);
 
   const getStatusBadge = (vehicleEmployeeStatus) => {
-    if (vehicleEmployeeStatus === "Available") {
-      return <span className="badge badge-success">Active</span>;
+    if (
+      vehicleEmployeeStatus === "Assigned" ||
+      vehicleEmployeeStatus === "Substituted"
+    ) {
+      return (
+        <span className="badge badge-success">{vehicleEmployeeStatus}</span>
+      );
     } else {
-      return <span className="badge badge-danger">Inactive</span>;
+      return (
+        <span className="badge badge-danger">{vehicleEmployeeStatus}</span>
+      );
     }
   };
+  // Deactivate,
+  // Leave,
+  // Assigned,
+  // Available,
+  // Substituted
   const ExpandedComponent = ({ data }) => {
     const {
       address,
@@ -51,6 +100,8 @@ const VMList = () => {
       licenseColor,
       licenseCardExpiredDate,
       vehicleEmployeeStatus,
+      assignedVehicleId,
+      assignedVehicleLicensePlate,
     } = data;
 
     const formatDate = (dateString) => {
@@ -119,18 +170,21 @@ const VMList = () => {
   };
 
   const handleDeleteClick = (id) => {
-    dispatch(disableVehicleManager(id)).then(() => {
+    dispatch(disableDriver(id)).then(() => {
       setActionSuccess(true);
       toast.success("Disabled Successfully");
     });
   };
   const handleReactivateClick = (id) => {
-    dispatch(reactivateVehicleManager(id)).then(() => {
+    dispatch(reactivateDriver(id)).then(() => {
       setActionSuccess(true);
       toast.success("Reactivated Successfully");
     });
   };
-
+  const handleLogOutClick = () => {
+    AuthService.deleteToken();
+    navigate("/");
+  };
   const columns = [
     {
       name: "Name",
@@ -138,12 +192,13 @@ const VMList = () => {
       sortable: true,
     },
     {
-      name: "Role",
-      selector: (row) => row.role,
+      name: "Vehicle",
+      selector: (row) => row.assignedVehicleLicensePlate,
       sortable: true,
     },
     {
       name: "Status",
+      selector: (row) => row.vehicleEmployeeStatus,
       cell: (row) => <div>{getStatusBadge(row.vehicleEmployeeStatus)}</div>,
       sortable: true,
     },
@@ -151,11 +206,15 @@ const VMList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
+          <a onClick={() => setModalShow(true)}>
+            <FaBus style={{ color: "#ec79cd" }} />
+          </a>
           <Link
             to={{
-              pathname: `/editVM/${row.id}`,
+              pathname: `/editDriver/${row.id}`,
             }}
             state={{ formData: row }}
+            className="ml-3"
           >
             <FaEdit />
           </Link>
@@ -183,14 +242,26 @@ const VMList = () => {
     <>
       <ToastContainer />
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5>Vehicle Managers</h5>
         <div>
-          <Button variant="success">Create + </Button>
+          <h5 className="d-inline">Drivers</h5>
+          <a className="ml-3">
+            <FaPlus className="mb-1" />
+          </a>
+        </div>
+        <div>
+          <AssignModal show={modalShow} onHide={() => setModalShow(false)} />
+
+          <a className="ml-3" onClick={handleLogOutClick}>
+            <FaPowerOff style={{ color: "#dc3545" }} />
+          </a>
         </div>
       </div>
       <DataTable
         columns={columns}
-        data={vehicleManagers.data}
+        data={drivers.data}
+        pagination
+        paginationPerPage={8}
+        paginationRowsPerPageOptions={[8, 10, 15, 20, 25]}
         //selectableRows
         expandableRows
         expandableRowsComponent={ExpandedComponent}
@@ -199,4 +270,4 @@ const VMList = () => {
   );
 };
 
-export default VMList;
+export default DriverList;

@@ -9,12 +9,14 @@ import {
 import AuthService from "../../services/AuthService";
 import { Card, Row, Col, Button } from "react-bootstrap";
 import { FaEdit, FaTrash, FaPlus, FaCheck } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, redirect } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useNavigate } from "react-router-dom";
 
 const VMList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
 
   const { vehicleManagers } = useSelector((state) => state.vms);
@@ -23,8 +25,15 @@ const VMList = () => {
   useEffect(() => {
     AuthService.setAuthHeader();
     dispatch(getAllVehicleManagers())
-      .then(() => setLoading(false))
-      .catch(() => setLoading(false));
+      .then(() => {
+        setLoading(false);
+      })
+      .catch((error) => {
+        setLoading(false);
+        toast.error(error.message || "Something went wrong!");
+        console.error("Error:", error);
+      });
+
     setActionSuccess(false);
   }, [actionSuccess]);
 
@@ -130,6 +139,10 @@ const VMList = () => {
       toast.success("Reactivated Successfully");
     });
   };
+  const handleLogOutClick = () => {
+    AuthService.deleteToken();
+    navigate("/");
+  };
 
   const columns = [
     {
@@ -185,6 +198,9 @@ const VMList = () => {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5>Vehicle Managers</h5>
         <div>
+          <Button variant="danger" onClick={handleLogOutClick} className="mr-2">
+            Log Out
+          </Button>
           <Button variant="success">Create + </Button>
         </div>
       </div>

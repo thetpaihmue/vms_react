@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import http from "../base-http";
 import AuthService from "../services/AuthService";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -39,17 +39,19 @@ const Login = () => {
     dispatch(login(formData))
       .unwrap()
       .then((data) => {
-        const jwtToken = data.data[0].token;
-        const decodedToken = jwt_decode(data.data[0].token);
+        console.log("then", data);
+        const jwtToken = data[0].token;
+        const decodedToken = jwt_decode(data[0].token);
         const { role, exp } = decodedToken;
 
         if (
-          role === ("SuperAdmin" || "VehicleManager") &&
+          (role === "SuperAdmin" || role === "VehicleManager") &&
           exp > Date.now() / 1000
         ) {
+          console.log("in if");
           Cookies.set("role", role);
           Cookies.set("expirationTime", exp);
-          Cookies.set("jwtToken", data.data[0].token);
+          Cookies.set("jwtToken", data[0].token);
 
           AuthService.setAuthHeader();
 
@@ -59,53 +61,54 @@ const Login = () => {
             navigate("/driverList");
           }
           toast.success("Login successful");
-        } else {
-          toast.error("Login failed");
         }
       })
       .catch((e) => {
-        console.log("err:", e);
-        toast.error("Login failed");
+        console.log("catch:", e);
+        toast.error(e.message || "Something went wrong!");
       });
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h5 className="card-title">Vehicle Management System</h5>
-              <div className="form-group">
-                <label htmlFor="userName">Username:</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="userName"
-                  name="userName"
-                  value={formData.userName}
-                  onChange={handleInputChange}
-                />
+    <>
+      <ToastContainer />
+      <div className="container mt-5">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card">
+              <div className="card-body">
+                <h5 className="card-title">Vehicle Management System</h5>
+                <div className="form-group">
+                  <label htmlFor="userName">Username:</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="userName"
+                    name="userName"
+                    value={formData.userName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="password">Password:</label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <button onClick={loginClick} className="btn btn-success">
+                  Login
+                </button>
               </div>
-              <div className="form-group">
-                <label htmlFor="password">Password:</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <button onClick={loginClick} className="btn btn-success">
-                Login
-              </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
