@@ -20,6 +20,7 @@ import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import EditVDAssignment from "./EditVDAssignment";
 
 function AssignModal(props) {
   return (
@@ -29,18 +30,14 @@ function AssignModal(props) {
       aria-labelledby="contained-modal-title-vcenter"
       centered
     >
-      <Modal.Header closeButton>
-        <Modal.Title id="contained-modal-title-vcenter">
-          Modal heading
-        </Modal.Title>
-      </Modal.Header>
+      <Modal.Header closeButton></Modal.Header>
       <Modal.Body>
-        <h4>Centered Modal</h4>
-        <p>
-          Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
-          dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta ac
-          consectetur ac, vestibulum at eros.
-        </p>
+        <EditVDAssignment
+          modelId={props.modelId}
+          modelName={props.modelName}
+          currentDriver={props.driverName}
+          currentDriverId={props.driverId}
+        />
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={props.onHide}>Close</Button>
@@ -48,13 +45,16 @@ function AssignModal(props) {
     </Modal>
   );
 }
-
 const DriverList = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
-  const [modalShow, setModalShow] = React.useState(false);
+  const [modalShow, setModalShow] = useState(false);
   const { drivers } = useSelector((state) => state.vms);
   const [actionSuccess, setActionSuccess] = useState(false);
+  const [currentDriver, setCurrentDriver] = useState(null);
+  const [currentDriverId, setCurrentDriverId] = useState(null);
+  const [modelName, setModelName] = useState(null);
+  const [modelId, setModelId] = useState(null);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -169,6 +169,17 @@ const DriverList = () => {
     );
   };
 
+  const handleOnClick = (row) => {
+    console.log("modal click");
+    if (!modalShow) {
+      setModalShow(true);
+      setCurrentDriver(row.name);
+      setCurrentDriverId(row.id);
+      setModelId(row.assignedVehicleId);
+      setModelName(row.assignedVehicleLicensePlate);
+    }
+  };
+
   const handleDeleteClick = (id) => {
     dispatch(disableDriver(id)).then(() => {
       setActionSuccess(true);
@@ -206,7 +217,7 @@ const DriverList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <a onClick={() => setModalShow(true)}>
+          <a onClick={() => handleOnClick(row)}>
             <FaBus style={{ color: "#ec79cd" }} />
           </a>
           <Link
@@ -249,7 +260,14 @@ const DriverList = () => {
           </a>
         </div>
         <div>
-          <AssignModal show={modalShow} onHide={() => setModalShow(false)} />
+          <AssignModal
+            show={modalShow}
+            onHide={() => setModalShow(false)}
+            driverName={currentDriver}
+            driverId={currentDriverId}
+            modelId={modelId}
+            modelName={modelName}
+          />
 
           <a className="ml-3" onClick={handleLogOutClick}>
             <FaPowerOff style={{ color: "#dc3545" }} />

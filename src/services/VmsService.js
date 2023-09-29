@@ -9,23 +9,6 @@ const login = (data) => {
     });
 };
 
-// Vehicle Managers //
-const getAllVehicleManagers = () => {
-  return http.get("/VehicleEmployees/GetAllVehicleManagers");
-};
-
-const editVehicleManager = (id, data) => {
-  return http.put(`/VehicleEmployees/UpdateVehicleEmployee/${id}`, data);
-};
-
-const disableVehicleManager = (id) => {
-  return http.put(`/VehicleEmployees/DeactivateVehicleEmployee/${id}`);
-};
-
-const reactivateVehicleManager = (id) => {
-  return http.put(`/VehicleEmployees/ActivateVehicleEmployee/${id}`);
-};
-
 // Drivers //
 const getAllDrivers = () => {
   return http.get("/VehicleEmployees/GetAllDrivers");
@@ -43,6 +26,31 @@ const reactivateDriver = (id) => {
   return http.put(`/VehicleEmployees/ActivateVehicleEmployee/${id}`);
 };
 
+const getAllAvailableDrivers = () => {
+  return http.get("/VehicleDriverAssignment/GetAllAvailableDrivers");
+};
+
+const updateVDAssignment = (data) => {
+  return http.put("/Vehicles/VehicleDriverAssignment", data);
+};
+
+// Vehicle Managers //
+const getAllVehicleManagers = () => {
+  return http.get("/VehicleEmployees/GetAllVehicleManagers");
+};
+
+const editVehicleManager = (id, data) => {
+  return http.put(`/VehicleEmployees/UpdateVehicleEmployee/${id}`, data);
+};
+
+const disableVehicleManager = (id) => {
+  return http.put(`/VehicleEmployees/DeactivateVehicleEmployee/${id}`);
+};
+
+const reactivateVehicleManager = (id) => {
+  return http.put(`/VehicleEmployees/ActivateVehicleEmployee/${id}`);
+};
+
 const VmsService = {
   login,
   getAllVehicleManagers,
@@ -54,6 +62,8 @@ const VmsService = {
   editDriver,
   disableDriver,
   reactivateDriver,
+  getAllAvailableDrivers,
+  updateVDAssignment,
 };
 
 export default VmsService;

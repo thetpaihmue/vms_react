@@ -100,6 +100,20 @@ export const reactivateDriver = createAsyncThunk(
   }
 );
 
+export const getAllAvailableDrivers = createAsyncThunk(
+  "employees/getAll",
+  async () => {
+    const res = await VmsService.getAllAvailableDrivers();
+    return res.data;
+  }
+);
+
+export const updateVDAssignment = createAsyncThunk("vd/edit", async (data) => {
+  console.log("in slice");
+  console.log("data", data);
+  const res = await VmsService.updateVDAssignment(data);
+  return res.data;
+});
 // Slice //
 const vmsSlice = createSlice({
   name: "vms",
@@ -121,6 +135,21 @@ const vmsSlice = createSlice({
 
     [editDriver.fulfilled]: (state, action) => {
       state.drivers = action.payload;
+    },
+
+    [updateVDAssignment.fulfilled]: (state, action) => {
+      const updatedAssignment = action.payload;
+      const updatedDrivers = state.drivers.data.map((driver) =>
+        driver.id === updatedAssignment.id ? updatedAssignment : driver
+      );
+
+      return {
+        ...state,
+        drivers: {
+          ...state.drivers,
+          data: updatedDrivers,
+        },
+      };
     },
   },
 });
