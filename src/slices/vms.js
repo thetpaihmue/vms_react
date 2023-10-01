@@ -24,7 +24,7 @@ export const login = createAsyncThunk(
 
 // Vehicle Managers //
 export const getAllVehicleManagers = createAsyncThunk(
-  "employees/getAll",
+  "vehicleManagers/getAll",
   async () => {
     const res = await VmsService.getAllVehicleManagers();
     return res.data;
@@ -32,7 +32,7 @@ export const getAllVehicleManagers = createAsyncThunk(
 );
 
 export const editVehicleManager = createAsyncThunk(
-  "employee/edit",
+  "vehicleManager/edit",
   async ({ id, formattedFormData }) => {
     console.log("in slice");
     console.log("id", id);
@@ -43,7 +43,7 @@ export const editVehicleManager = createAsyncThunk(
 );
 
 export const disableVehicleManager = createAsyncThunk(
-  "employee/disable",
+  "vehicleManagers/disable",
   async (id) => {
     console.log("in slice");
     console.log("id", id);
@@ -53,7 +53,7 @@ export const disableVehicleManager = createAsyncThunk(
 );
 
 export const reactivateVehicleManager = createAsyncThunk(
-  "employee/reactivate",
+  "vehicleManagers/reactivate",
   async (id) => {
     console.log("in slice");
     console.log("id", id);

@@ -30,7 +30,9 @@ function AssignModal(props) {
       aria-labelledby="contained-modal-title-vcenter"
       centered
     >
-      <Modal.Header closeButton></Modal.Header>
+      <Modal.Header closeButton>
+        <div></div>
+      </Modal.Header>
       <Modal.Body>
         <EditVDAssignment
           modelId={props.modelId}
@@ -39,9 +41,9 @@ function AssignModal(props) {
           currentDriverId={props.driverId}
         />
       </Modal.Body>
-      <Modal.Footer>
+      {/* <Modal.Footer>
         <Button onClick={props.onHide}>Close</Button>
-      </Modal.Footer>
+      </Modal.Footer> */}
     </Modal>
   );
 }
@@ -86,6 +88,7 @@ const DriverList = () => {
   // Substituted
   const ExpandedComponent = ({ data }) => {
     const {
+      id,
       address,
       dateOfBirth,
       email,
@@ -124,6 +127,9 @@ const DriverList = () => {
                 >
                   {role} - {vehicleEmployeeStatus}
                 </Card.Subtitle>
+                <Card.Text>
+                  <strong>Id:</strong> {id}
+                </Card.Text>
               </Col>
               <Col md={6}>
                 <Card.Text>
@@ -140,6 +146,9 @@ const DriverList = () => {
             <hr />
             <Row>
               <Col md={6}>
+                <Card.Text>
+                  <strong>Vehicle Id:</strong> {assignedVehicleId}
+                </Card.Text>
                 <Card.Text>
                   <strong>Date of Birth:</strong> {formatDate(dateOfBirth)}
                 </Card.Text>

@@ -29,7 +29,7 @@ const EditVehicleDriverAssignment = ({
         )
       : [1, 2];
     setAvailableDrivers(filteredDrivers);
-  }, []);
+  }, [formData]);
   console.log("availableDrivers", availableDrivers);
 
   const handleSubmit = (e) => {
@@ -75,11 +75,11 @@ const EditVehicleDriverAssignment = ({
                 aria-label="Driver Select"
                 name="VehicleEmployeeId"
                 style={{ width: "100%" }}
-                value={currentDriverId} // Set the selected value based on currentDriverId
+                value={formData.vehicleEmployeeId} // Set the selected value based on currentDriverId
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    VehicleEmployeeId: e.target.value,
+                    vehicleEmployeeId: e.target.value,
                   })
                 }
               >
@@ -94,8 +94,12 @@ const EditVehicleDriverAssignment = ({
                 ))}
               </select>
             </div>
-            <div className="form-group">
-              <input type="submit" value="Update" className="btn btn-fmss" />
+            <div className="form-group mt-5 d-flex justify-content-end">
+              <input
+                type="submit"
+                value="Update"
+                className="btn btn-primary text-white"
+              />
             </div>
           </form>
         </div>
