@@ -8,7 +8,18 @@ const login = (data) => {
       return error.response.data;
     });
 };
+// Vehicles //
+const getAllVehicles = () => {
+  return http.get("/Vehicles/GetAllVehicles");
+};
 
+const rentVehicle = (id) => {
+  return http.put(`/Vehicles/EnableUsableVehicle/${id}`);
+};
+
+const returnVehicle = (id) => {
+  return http.put(`/Vehicles/DisableUsableVehicle/${id}`);
+};
 // Drivers //
 const getAllDrivers = () => {
   return http.get("/VehicleEmployees/GetAllDrivers");
@@ -52,6 +63,10 @@ const reactivateVehicleManager = (id) => {
 };
 
 const VmsService = {
+  getAllVehicles,
+  rentVehicle,
+  returnVehicle,
+
   login,
   getAllVehicleManagers,
   editVehicleManager,

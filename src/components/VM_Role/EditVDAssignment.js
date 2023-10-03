@@ -15,6 +15,8 @@ const EditVehicleDriverAssignment = ({
   console.log("drivers", drivers);
   console.log("modelId", modelId);
   console.log("modelName", modelName);
+  console.log("currentDriver", currentDriver);
+  console.log("currentDriverId", currentDriverId);
   const initialFormData = {
     vehicleId: modelId,
     vehicleEmployeeId: currentDriverId || "",
@@ -37,8 +39,7 @@ const EditVehicleDriverAssignment = ({
     AuthService.setAuthHeader();
     console.log("Form submitted with data:", formData);
 
-    // Dispatch an action with the form data
-    dispatch(updateVDAssignment(formData)); // Replace with your actual action and payload
+    dispatch(updateVDAssignment(formData));
   };
 
   return (
@@ -75,7 +76,7 @@ const EditVehicleDriverAssignment = ({
                 aria-label="Driver Select"
                 name="VehicleEmployeeId"
                 style={{ width: "100%" }}
-                value={formData.vehicleEmployeeId} // Set the selected value based on currentDriverId
+                value={formData.vehicleEmployeeId || ""}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -86,6 +87,12 @@ const EditVehicleDriverAssignment = ({
                 <option value="" disabled>
                   Select a driver
                 </option>
+
+                {currentDriverId && (
+                  <option value={currentDriverId} key={currentDriverId}>
+                    {currentDriver}
+                  </option>
+                )}
 
                 {availableDrivers.map((driver) => (
                   <option key={driver.id} value={driver.id}>

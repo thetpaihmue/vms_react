@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getAllDrivers,
-  disableDriver,
-  reactivateDriver,
-} from "../../slices/vms";
+import { getAllVehicles, getAllDrivers } from "../../slices/vms";
 import AuthService from "../../services/AuthService";
 import { Card, Row, Col, Button, Modal } from "react-bootstrap";
 import {
@@ -21,8 +17,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import EditVDAssignment from "./EditVDAssignment";
+import { rentVehicle, returnVehicle } from "../../slices/vms";
 import SideNavigation from "../SideNavigation";
-
 function AssignModal(props) {
   return (
     <Modal
@@ -48,70 +44,95 @@ function AssignModal(props) {
     </Modal>
   );
 }
-const DriverList = () => {
+function RentModal(props) {
+  return (
+    <Modal
+      {...props}
+      size="md"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+    >
+      <Modal.Header closeButton>
+        <div>Notice!</div>
+      </Modal.Header>
+      <Modal.Body>
+        {props.rent === true ? (
+          <span>Are you sure to remove this vehicle from the rent list? </span>
+        ) : (
+          <span>Are you sure to rent this vehicle?</span>
+        )}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={props.handleRentClick}>Yes</Button>
+        <Button onClick={props.onHide}>Close</Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
+
+const VehicleList = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const [modalShow, setModalShow] = useState(false);
+  const [rentModalShow, setRentModalShow] = useState(false);
   const { drivers } = useSelector((state) => state.vms);
+  const { vehicles } = useSelector((state) => state.vms);
   const [actionSuccess, setActionSuccess] = useState(false);
   const [currentDriver, setCurrentDriver] = useState(null);
   const [currentDriverId, setCurrentDriverId] = useState(null);
   const [modelName, setModelName] = useState(null);
   const [modelId, setModelId] = useState(null);
+  const [rentStatus, setRentStatus] = useState(false);
 
   const navigate = useNavigate();
   useEffect(() => {
     AuthService.setAuthHeader();
-    dispatch(getAllDrivers())
+    dispatch(getAllDrivers());
+    dispatch(getAllVehicles())
       .then(() => setLoading(false))
       .catch(() => setLoading(false));
     setActionSuccess(false);
   }, [actionSuccess]);
 
-  const getStatusBadge = (vehicleEmployeeStatus) => {
-    if (
-      vehicleEmployeeStatus === "Assigned" ||
-      vehicleEmployeeStatus === "Substituted"
-    ) {
-      return (
-        <span className="badge badge-success">{vehicleEmployeeStatus}</span>
-      );
+  const getStatusBadge = (vehicleStatus) => {
+    if (vehicleStatus === "Assigned" || vehicleStatus === "Substituted") {
+      return <span className="badge badge-success">{vehicleStatus}</span>;
     } else {
-      return (
-        <span className="badge badge-danger">{vehicleEmployeeStatus}</span>
-      );
+      return <span className="badge badge-danger">{vehicleStatus}</span>;
     }
   };
   // Deactivate,
   // Leave,
   // Assigned,
-  // Available,
-  // Substituted
+  // Substituted,
+  // NoDriver,
+  // Available
   const ExpandedComponent = ({ data }) => {
     const {
       id,
-      address,
-      dateOfBirth,
-      email,
-      nrc,
-      phoneNumber,
-      role,
-      gender,
-      name,
+      licensePlate,
+      plateExpiredDate,
+      photoPath,
+      vehicleTypeId,
+      vehicleType,
+      color,
+      startPoint,
+      isUsable,
+      vehicleEmployeeId,
+      vehicleEmployee,
+      vehicleStatus,
+      createdAt,
       updatedAt,
-      vehicleEmployeeNumber,
-      licenseNumber,
-      licenseColor,
-      licenseCardExpiredDate,
-      vehicleEmployeeStatus,
-      assignedVehicleId,
-      assignedVehicleLicensePlate,
+      updatedBy,
+      updatedByName,
     } = data;
 
     const formatDate = (dateString) => {
       const options = { day: "2-digit", month: "2-digit", year: "numeric" };
       return new Date(dateString).toLocaleDateString(undefined, options);
     };
+    const employeeName = (vehicleEmployee && vehicleEmployee.name) || "";
+    const employeeId = (vehicleEmployee && vehicleEmployeeId) || "";
 
     return (
       <div>
@@ -120,57 +141,20 @@ const DriverList = () => {
             <Row>
               <Col md={6}>
                 <Card.Title style={{ fontSize: "13px" }}>
-                  {name} - {vehicleEmployeeNumber}
+                  {licensePlate} - {vehicleType.model}
                 </Card.Title>
                 <Card.Subtitle
                   style={{ fontSize: "13px" }}
                   className="mb-2 text-muted"
                 >
-                  {role} - {vehicleEmployeeStatus}
+                  Vehicle Id - {id}
                 </Card.Subtitle>
-                <Card.Text>
-                  <strong>Id:</strong> {id}
-                </Card.Text>
-              </Col>
-              <Col md={6}>
-                <Card.Text>
-                  <strong>Email:</strong> {email}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Phone Number:</strong> {phoneNumber}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Address:</strong> {address}
-                </Card.Text>
-              </Col>
-            </Row>
-            <hr />
-            <Row>
-              <Col md={6}>
-                <Card.Text>
-                  <strong>Vehicle Id:</strong> {assignedVehicleId}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Date of Birth:</strong> {formatDate(dateOfBirth)}
-                </Card.Text>
-                <Card.Text>
-                  <strong>NRC:</strong> {nrc}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Gender:</strong> {gender}
-                </Card.Text>
-              </Col>
-              <Col md={6}>
-                <Card.Text>
-                  <strong>License Number:</strong> {licenseNumber}
-                </Card.Text>
-                <Card.Text>
-                  <strong>License Card Expired Date:</strong>{" "}
-                  {formatDate(licenseCardExpiredDate)}
-                </Card.Text>
-                <Card.Text>
-                  <strong>Last Updated:</strong> {formatDate(updatedAt)}
-                </Card.Text>
+                <Card.Subtitle
+                  style={{ fontSize: "13px" }}
+                  className="mb-2 text-muted"
+                >
+                  {employeeName} - {employeeId}
+                </Card.Subtitle>
               </Col>
             </Row>
           </Card.Body>
@@ -183,24 +167,51 @@ const DriverList = () => {
     console.log("modal click");
     if (!modalShow) {
       setModalShow(true);
-      setCurrentDriver(row.name);
-      setCurrentDriverId(row.id);
-      setModelId(row.assignedVehicleId);
-      setModelName(row.assignedVehicleLicensePlate);
+      setCurrentDriver(row.vehicleEmployee ? row.vehicleEmployee.name : "");
+      setCurrentDriverId(row.vehicleEmployeeId);
+      setModelId(row.id);
+      setModelName(row.licensePlate);
+      console.log("handleOnClick" + modelId);
     }
   };
 
+  const handleOnClickRent = (row) => {
+    console.log("modal click");
+    if (!rentModalShow) {
+      setRentModalShow(true);
+      setRentStatus(row.isUsable);
+      setCurrentDriver(row.vehicleEmployee ? row.vehicleEmployee.name : "");
+      setCurrentDriverId(row.vehicleEmployeeId);
+      setModelId(row.id);
+      setModelName(row.licensePlate);
+      console.log("handleOnClickRent" + row.modelId);
+    }
+  };
+
+  const handleRentClick = () => {
+    if (rentStatus === true) {
+      dispatch(returnVehicle(modelId)).then(() => {
+        setActionSuccess(true);
+        toast.success("Returned Successfully");
+      });
+    } else {
+      dispatch(rentVehicle(modelId)).then(() => {
+        setActionSuccess(true);
+        toast.success("Rented Successfully");
+      });
+    }
+  };
   const handleDeleteClick = (id) => {
-    dispatch(disableDriver(id)).then(() => {
-      setActionSuccess(true);
-      toast.success("Disabled Successfully");
-    });
+    // dispatch(disableDriver(id)).then(() => {
+    //   setActionSuccess(true);
+    //   toast.success("Disabled Successfully");
+    // });
   };
   const handleReactivateClick = (id) => {
-    dispatch(reactivateDriver(id)).then(() => {
-      setActionSuccess(true);
-      toast.success("Reactivated Successfully");
-    });
+    // dispatch(reactivateDriver(id)).then(() => {
+    //   setActionSuccess(true);
+    //   toast.success("Reactivated Successfully");
+    // });
   };
   const handleLogOutClick = () => {
     AuthService.deleteToken();
@@ -208,19 +219,41 @@ const DriverList = () => {
   };
   const columns = [
     {
-      name: "Name",
-      selector: (row) => row.name,
+      name: "Plate",
+      selector: (row) => row.licensePlate,
       sortable: true,
     },
     {
-      name: "Vehicle",
-      selector: (row) => row.assignedVehicleLicensePlate,
+      name: "Type",
+      selector: (row) => row.vehicleType.model,
       sortable: true,
     },
+    {
+      name: "Rent",
+      selector: (row) => row.isUsable,
+      cell: (row) =>
+        row.isUsable ? (
+          <>
+            <span className="badge badge-success mr-2">Yes </span>
+            <a onClick={() => handleOnClickRent(row)}>
+              <FaEdit style={{ color: "#007bff" }} />
+            </a>
+          </>
+        ) : (
+          <>
+            <span className="badge badge-danger mr-2">No</span>
+            <a onClick={() => handleOnClickRent(row)}>
+              <FaEdit style={{ color: "#007bff" }} />
+            </a>
+          </>
+        ),
+      sortable: true,
+    },
+
     {
       name: "Status",
-      selector: (row) => row.vehicleEmployeeStatus,
-      cell: (row) => <div>{getStatusBadge(row.vehicleEmployeeStatus)}</div>,
+      selector: (row) => row.vehicleStatus,
+      cell: (row) => <div>{getStatusBadge(row.vehicleStatus)}</div>,
       sortable: true,
     },
     {
@@ -230,15 +263,6 @@ const DriverList = () => {
           <a onClick={() => handleOnClick(row)}>
             <FaBus style={{ color: "#ec79cd" }} />
           </a>
-          <Link
-            to={{
-              pathname: `/editDriver/${row.id}`,
-            }}
-            state={{ formData: row }}
-            className="ml-3"
-          >
-            <FaEdit />
-          </Link>
 
           <a className="ml-3" onClick={() => handleDeleteClick(row.id)}>
             <FaTrash style={{ color: "#dc3545" }} />
@@ -265,11 +289,18 @@ const DriverList = () => {
       <SideNavigation />
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
-          <h5 className="d-inline">Drivers</h5>
+          <h5 className="d-inline">Vehicles</h5>
           <a className="ml-3">
             <FaPlus className="mb-1" />
           </a>
         </div>
+        <RentModal
+          show={rentModalShow}
+          onHide={() => setRentModalShow(false)}
+          rent={rentStatus}
+          modelId={modelId}
+          handleRentClick={handleRentClick}
+        />
         <div>
           <AssignModal
             show={modalShow}
@@ -287,7 +318,7 @@ const DriverList = () => {
       </div>
       <DataTable
         columns={columns}
-        data={drivers.data}
+        data={vehicles.data}
         pagination
         paginationPerPage={8}
         paginationRowsPerPageOptions={[8, 10, 15, 20, 25]}
@@ -299,4 +330,4 @@ const DriverList = () => {
   );
 };
 
-export default DriverList;
+export default VehicleList;

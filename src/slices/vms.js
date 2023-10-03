@@ -4,6 +4,7 @@ import VmsService from "../services/VmsService";
 const initialState = {
   vehicleManagers: [],
   drivers: [],
+  vehicles: [],
 };
 
 export const login = createAsyncThunk(
@@ -21,7 +22,25 @@ export const login = createAsyncThunk(
     return res.data;
   }
 );
+// Vehicles //
+export const getAllVehicles = createAsyncThunk("vehicles/getAll", async () => {
+  const res = await VmsService.getAllVehicles();
+  return res.data;
+});
 
+export const rentVehicle = createAsyncThunk("vehicle/rent", async (id) => {
+  console.log("in slice");
+  console.log("id", id);
+  const res = await VmsService.rentVehicle(id);
+  return res.data;
+});
+
+export const returnVehicle = createAsyncThunk("vehicle/return", async (id) => {
+  console.log("in slice");
+  console.log("id", id);
+  const res = await VmsService.returnVehicle(id);
+  return res.data;
+});
 // Vehicle Managers //
 export const getAllVehicleManagers = createAsyncThunk(
   "vehicleManagers/getAll",
@@ -114,43 +133,49 @@ export const updateVDAssignment = createAsyncThunk("vd/edit", async (data) => {
   const res = await VmsService.updateVDAssignment(data);
   return res.data;
 });
+
 // Slice //
 const vmsSlice = createSlice({
   name: "vms",
   initialState,
-  extraReducers: {
-    [login.fulfilled]: (state, action) => {},
+  extraReducers: (builder) => {
+    builder
+      .addCase(login.fulfilled, (state, action) => {})
+      .addCase(rentVehicle.fulfilled, (state, action) => {
+        state.vehicles = action.payload;
+      })
+      .addCase(returnVehicle.fulfilled, (state, action) => {
+        state.vehicles = action.payload;
+      })
+      .addCase(getAllVehicles.fulfilled, (state, action) => {
+        state.vehicles = action.payload;
+      })
+      .addCase(getAllVehicleManagers.fulfilled, (state, action) => {
+        state.vehicleManagers = action.payload;
+      })
+      .addCase(editVehicleManager.fulfilled, (state, action) => {
+        state.vehicleManagers = action.payload;
+      })
+      .addCase(getAllDrivers.fulfilled, (state, action) => {
+        state.drivers = action.payload;
+      })
+      .addCase(editDriver.fulfilled, (state, action) => {
+        state.drivers = action.payload;
+      })
+      .addCase(updateVDAssignment.fulfilled, (state, action) => {
+        const updatedAssignment = action.payload;
+        const updatedDrivers = state.drivers.data.map((driver) =>
+          driver.id === updatedAssignment.id ? updatedAssignment : driver
+        );
 
-    [getAllVehicleManagers.fulfilled]: (state, action) => {
-      state.vehicleManagers = action.payload;
-    },
-
-    [editVehicleManager.fulfilled]: (state, action) => {
-      state.vehicleManagers = action.payload;
-    },
-
-    [getAllDrivers.fulfilled]: (state, action) => {
-      state.drivers = action.payload;
-    },
-
-    [editDriver.fulfilled]: (state, action) => {
-      state.drivers = action.payload;
-    },
-
-    [updateVDAssignment.fulfilled]: (state, action) => {
-      const updatedAssignment = action.payload;
-      const updatedDrivers = state.drivers.data.map((driver) =>
-        driver.id === updatedAssignment.id ? updatedAssignment : driver
-      );
-
-      return {
-        ...state,
-        drivers: {
-          ...state.drivers,
-          data: updatedDrivers,
-        },
-      };
-    },
+        return {
+          ...state,
+          drivers: {
+            ...state.drivers,
+            data: updatedDrivers,
+          },
+        };
+      });
   },
 });
 

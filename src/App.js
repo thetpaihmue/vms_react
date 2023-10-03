@@ -8,6 +8,7 @@ import EditVMProfile from "./components/SA_Role/EditVMProfile";
 import { ToastContainer } from "react-bootstrap";
 import DriverList from "./components/VM_Role/DriverList";
 import EditDriverProfile from "./components/VM_Role/EditDriverProfile";
+import VehicleList from "./components/VM_Role/VehicleList";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/vmList" element={<VMList />} />
             <Route path="/driverList" element={<DriverList />} />
             <Route path="/editDriver/:id" element={<EditDriverProfile />} />
+            <Route path="/vList" element={<VehicleList />} />
           </Routes>
         </div>
       </Router>
