@@ -12,12 +12,13 @@ import {
   FaBus,
   FaPowerOff,
 } from "react-icons/fa";
+import { BsFillPersonXFill, BsFillPersonCheckFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import EditVDAssignment from "./EditVDAssignment";
-import { rentVehicle, returnVehicle } from "../../slices/vms";
+import { rentVehicle, returnVehicle, removeAssginment } from "../../slices/vms";
 import SideNavigation from "../SideNavigation";
 function AssignModal(props) {
   return (
@@ -44,6 +45,29 @@ function AssignModal(props) {
     </Modal>
   );
 }
+function RemoveAssignModal(props) {
+  return (
+    <Modal
+      {...props}
+      size="md"
+      aria-labelledby="contained-modal-title-vcenter"
+      centered
+    >
+      <Modal.Header closeButton>
+        <div></div>
+      </Modal.Header>
+      <Modal.Body>
+        Are you sure to remove {props.driverName} from {props.modelName}?
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={props.handleRemoveAssignClick}>Yes</Button>
+        <Button className="btn btn-danger" onClick={props.onHide}>
+          Close
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
+}
 function RentModal(props) {
   return (
     <Modal
@@ -64,7 +88,9 @@ function RentModal(props) {
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={props.handleRentClick}>Yes</Button>
-        <Button onClick={props.onHide}>Close</Button>
+        <Button className="btn btn-danger" onClick={props.onHide}>
+          Close
+        </Button>
       </Modal.Footer>
     </Modal>
   );
@@ -83,7 +109,7 @@ const VehicleList = () => {
   const [modelName, setModelName] = useState(null);
   const [modelId, setModelId] = useState(null);
   const [rentStatus, setRentStatus] = useState(false);
-
+  const [removeAssignModalShow, setRemoveAssignModalShow] = useState(false);
   const navigate = useNavigate();
   useEffect(() => {
     AuthService.setAuthHeader();
@@ -175,6 +201,18 @@ const VehicleList = () => {
     }
   };
 
+  const handleOnClickForRemove = (row) => {
+    console.log("modal click");
+    if (!modalShow) {
+      setRemoveAssignModalShow(true);
+      setCurrentDriver(row.vehicleEmployee ? row.vehicleEmployee.name : "");
+      setCurrentDriverId(row.vehicleEmployeeId);
+      setModelId(row.id);
+      setModelName(row.licensePlate);
+      console.log("handleOnClick" + modelId);
+    }
+  };
+
   const handleOnClickRent = (row) => {
     console.log("modal click");
     if (!rentModalShow) {
@@ -200,6 +238,14 @@ const VehicleList = () => {
         toast.success("Rented Successfully");
       });
     }
+  };
+  const handleRemoveAssignClick = () => {
+    dispatch(
+      removeAssginment({ vehicleId: modelId, employeeId: currentDriverId })
+    ).then(() => {
+      setActionSuccess(true);
+      toast.success("Removed Successfully");
+    });
   };
   const handleDeleteClick = (id) => {
     // dispatch(disableDriver(id)).then(() => {
@@ -260,9 +306,15 @@ const VehicleList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <a onClick={() => handleOnClick(row)}>
-            <FaBus style={{ color: "#ec79cd" }} />
-          </a>
+          {row.vehicleStatus === "Available" ? (
+            <a onClick={() => handleOnClickForRemove(row)}>
+              <BsFillPersonXFill style={{ color: "#ec79cd" }} />
+            </a>
+          ) : (
+            <a onClick={() => handleOnClick(row)}>
+              <BsFillPersonCheckFill style={{ color: "#ec79cd" }} />
+            </a>
+          )}
 
           <a className="ml-3" onClick={() => handleDeleteClick(row.id)}>
             <FaTrash style={{ color: "#dc3545" }} />
@@ -310,7 +362,15 @@ const VehicleList = () => {
             modelId={modelId}
             modelName={modelName}
           />
-
+          <RemoveAssignModal
+            show={removeAssignModalShow}
+            onHide={() => setRemoveAssignModalShow(false)}
+            driverName={currentDriver}
+            driverId={currentDriverId}
+            modelId={modelId}
+            modelName={modelName}
+            handleRemoveAssignClick={handleRemoveAssignClick}
+          />
           <a className="ml-3" onClick={handleLogOutClick}>
             <FaPowerOff style={{ color: "#dc3545" }} />
           </a>

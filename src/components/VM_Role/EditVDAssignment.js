@@ -12,6 +12,8 @@ const EditVehicleDriverAssignment = ({
   const dispatch = useDispatch();
   const [availableDrivers, setAvailableDrivers] = useState([]);
   const { drivers } = useSelector((state) => state.vms);
+  const [actionSuccess, setActionSuccess] = useState(false);
+
   console.log("drivers", drivers);
   console.log("modelId", modelId);
   console.log("modelName", modelName);
@@ -31,7 +33,7 @@ const EditVehicleDriverAssignment = ({
         )
       : [1, 2];
     setAvailableDrivers(filteredDrivers);
-  }, [formData]);
+  }, [formData, actionSuccess]);
   console.log("availableDrivers", availableDrivers);
 
   const handleSubmit = (e) => {

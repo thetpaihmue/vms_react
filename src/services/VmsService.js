@@ -20,6 +20,14 @@ const rentVehicle = (id) => {
 const returnVehicle = (id) => {
   return http.put(`/Vehicles/DisableUsableVehicle/${id}`);
 };
+
+const updateVDAssignment = (data) => {
+  return http.put("/Vehicles/VehicleDriverAssignment", data);
+};
+
+const removeAssginment = (data) => {
+  return http.put(`/Vehicles/RemoveVehicleDriverAssignment`, data);
+};
 // Drivers //
 const getAllDrivers = () => {
   return http.get("/VehicleEmployees/GetAllDrivers");
@@ -39,10 +47,6 @@ const reactivateDriver = (id) => {
 
 const getAllAvailableDrivers = () => {
   return http.get("/VehicleDriverAssignment/GetAllAvailableDrivers");
-};
-
-const updateVDAssignment = (data) => {
-  return http.put("/Vehicles/VehicleDriverAssignment", data);
 };
 
 // Vehicle Managers //
@@ -66,6 +70,8 @@ const VmsService = {
   getAllVehicles,
   rentVehicle,
   returnVehicle,
+  updateVDAssignment,
+  removeAssginment,
 
   login,
   getAllVehicleManagers,
@@ -78,7 +84,6 @@ const VmsService = {
   disableDriver,
   reactivateDriver,
   getAllAvailableDrivers,
-  updateVDAssignment,
 };
 
 export default VmsService;

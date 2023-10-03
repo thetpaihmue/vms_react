@@ -134,6 +134,13 @@ export const updateVDAssignment = createAsyncThunk("vd/edit", async (data) => {
   return res.data;
 });
 
+export const removeAssginment = createAsyncThunk("vd/remove", async (data) => {
+  console.log("in slice");
+  console.log("data", data);
+  const res = await VmsService.removeAssginment(data);
+  return res.data;
+});
+
 // Slice //
 const vmsSlice = createSlice({
   name: "vms",
@@ -163,6 +170,20 @@ const vmsSlice = createSlice({
         state.drivers = action.payload;
       })
       .addCase(updateVDAssignment.fulfilled, (state, action) => {
+        const updatedAssignment = action.payload;
+        const updatedDrivers = state.drivers.data.map((driver) =>
+          driver.id === updatedAssignment.id ? updatedAssignment : driver
+        );
+
+        return {
+          ...state,
+          drivers: {
+            ...state.drivers,
+            data: updatedDrivers,
+          },
+        };
+      })
+      .addCase(removeAssginment.fulfilled, (state, action) => {
         const updatedAssignment = action.payload;
         const updatedDrivers = state.drivers.data.map((driver) =>
           driver.id === updatedAssignment.id ? updatedAssignment : driver
