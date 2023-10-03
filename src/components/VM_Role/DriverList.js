@@ -20,34 +20,8 @@ import { Link } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
-import EditVDAssignment from "./EditVDAssignment";
 import SideNavigation from "../SideNavigation";
 
-function AssignModal(props) {
-  return (
-    <Modal
-      {...props}
-      size="md"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered
-    >
-      <Modal.Header closeButton>
-        <div></div>
-      </Modal.Header>
-      <Modal.Body>
-        <EditVDAssignment
-          modelId={props.modelId}
-          modelName={props.modelName}
-          currentDriver={props.driverName}
-          currentDriverId={props.driverId}
-        />
-      </Modal.Body>
-      {/* <Modal.Footer>
-        <Button onClick={props.onHide}>Close</Button>
-      </Modal.Footer> */}
-    </Modal>
-  );
-}
 const DriverList = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
@@ -179,17 +153,6 @@ const DriverList = () => {
     );
   };
 
-  const handleOnClick = (row) => {
-    console.log("modal click");
-    if (!modalShow) {
-      setModalShow(true);
-      setCurrentDriver(row.name);
-      setCurrentDriverId(row.id);
-      setModelId(row.assignedVehicleId);
-      setModelName(row.assignedVehicleLicensePlate);
-    }
-  };
-
   const handleDeleteClick = (id) => {
     dispatch(disableDriver(id)).then(() => {
       setActionSuccess(true);
@@ -227,9 +190,6 @@ const DriverList = () => {
       name: "Actions",
       cell: (row) => (
         <div>
-          <a onClick={() => handleOnClick(row)}>
-            <FaBus style={{ color: "#ec79cd" }} />
-          </a>
           <Link
             to={{
               pathname: `/editDriver/${row.id}`,
@@ -271,15 +231,6 @@ const DriverList = () => {
           </a>
         </div>
         <div>
-          <AssignModal
-            show={modalShow}
-            onHide={() => setModalShow(false)}
-            driverName={currentDriver}
-            driverId={currentDriverId}
-            modelId={modelId}
-            modelName={modelName}
-          />
-
           <a className="ml-3" onClick={handleLogOutClick}>
             <FaPowerOff style={{ color: "#dc3545" }} />
           </a>
